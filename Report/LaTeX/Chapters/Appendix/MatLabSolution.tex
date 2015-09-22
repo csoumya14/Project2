@@ -1,0 +1,28 @@
+\chapter{MatLab code for smt....}
+\label{app:MatLabSolution}
+This is how, we write MatLab code in the report
+\lstset{language=Matlab}
+\begin{lstlisting}
+close all
+clear all
+clc
+%I am a comment
+
+filename = 'Results.xlsx';
+sheet = 4;
+xlRange = 'B3:C12';
+
+[v,T,vT] = xlsread(filename, sheet, xlRange);
+x10=v(:,1);y10=v(:,2);
+
+figure
+plot(??)
+legend(??)
+
+xlim([??])
+ylim([??])
+
+title(??)
+xlabel('x')
+ylabel('y')
+\end{lstlisting}
