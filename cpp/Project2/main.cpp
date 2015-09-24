@@ -46,7 +46,7 @@ void find_max(mat &A, int &n, int &row_number, int &column_number)
         return;
 }
 
-double Jacobi (mat A, int n, double epsilon)
+void Jacobi (mat &A, int n, double epsilon)
 {
     int row_number, column_number;
     row_number = 0;
@@ -54,13 +54,13 @@ double Jacobi (mat A, int n, double epsilon)
     find_max(A,n,row_number,column_number);
     double max;
     max = A(row_number, column_number);
-
+    /*
     cout << "First A = " << endl;
     cout << A << fabs(max) << setw(10) << row_number << setw(10) << column_number << endl;
-
+    */
     // Use simpler test:
     int m=0;
-    while(fabs(max)> epsilon && m<20)
+    while(pow(fabs(max),2)> epsilon && m<20)
     {
     if (fabs(max) > epsilon)
     {
@@ -121,20 +121,19 @@ double Jacobi (mat A, int n, double epsilon)
         }
 */
         A = temp;
+        row_number = 0;
+        column_number = 1;
 
         find_max(A,n,row_number,column_number);
         m += 1;
         max = A(row_number,column_number);
-
+/*
         cout << "number of iterations = " << m << endl;
         cout << "new A = " << endl;
         cout << A << max << setw(10) << row_number << setw(10) << column_number << endl;
-    }
-    }
-/*
-cout << "new A = " << endl;
-cout << A << max << setw(10) << row_number << setw(10) << column_number << endl;
 */
+    }
+    }
 }
 
 int main()
@@ -147,6 +146,8 @@ int main()
     cout << "Please enter value of n:\n>";
     cin >> n;
     cout << "n = " << n << endl;
+    cout << "rho_min = " << rho_min << endl;
+    cout << "rho_max = " << rho_max << endl;
 
     double h = (rho_max - rho_min)/(n+1); //step length
 
@@ -176,8 +177,21 @@ int main()
     {
         A(i,i+1) = off_diagonal;
     }
-
+/*
+    cout << "A=" << endl;
+    cout << A << endl;
+*/
     Jacobi(A,n,epsilon);
+
+    vec eigen_values(n);
+
+    for (int i=0; i<n; i++)
+    {
+        eigen_values(i) = A(i,i);
+    }
+
+    cout << "eigen values:" << endl;
+    cout << eigen_values << endl;
 
     return 0;
 }
