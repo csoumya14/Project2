@@ -7,14 +7,12 @@ using std::setw;
 #include "include\armadillo"
 using namespace arma;
 
-double find_max(mat A, int n)
+void find_max(mat &A, int &n, int &row_number, int &column_number)
+// set row_number = 0 and column_number = 1, when running the code. These are the initial guesses for max(A(i,j))
 {
     // Finding maximum matrix element (and its row and column numbers) of the non-diagonal A
         double max = A(0,1);
-        int row_number;
-        int column_number;
-        row_number = 0;
-        column_number = 1;
+
         for (int i=0; i<n; i++) //Compare entrances in the upper part of the matrix. Choose largest one (abs-value).
         {
             for (int j=i+1; j<n; j++)
@@ -28,6 +26,9 @@ double find_max(mat A, int n)
             }
             }
         }
+//we are only considering the upper part of the matrix when seaching for the largest element
+//since the matrix is symmetric
+/*
         for (int i=1; i<n; i++) //Compare entrances in the lower part of the matrix. Choose largest one (abs-value).
         {
             for (int j=0; j<i; j++)
@@ -41,25 +42,26 @@ double find_max(mat A, int n)
             }
             }
         }
-        double MaxInfo[3] = {max, row_number, column_number}; //0: max value, 1: row number, 2: column number
-        //MaxInfo(0) = max;
-        //MaxInfo(1) = row_number;
-        //MaxInfo(2) = column_number;
-        return {MaxInfo[0], MaxInfo[1], MaxInfo[2]};
+*/
+        return;
 }
 
-double Jacobi (mat A, int n, double epsilon)
+void Jacobi (mat &A, int n, double epsilon)
 {
-    vec MaxInfo(3);
-    MaxInfo = find_max(A,n);
-    double max = MaxInfo(0);
-    int row_number = MaxInfo(1);
-    int column_number = MaxInfo(2);
-
-    cout << A << max << setw(10) << row_number << setw(10) << column_number << endl;
-
+    int row_number, column_number;
+    row_number = 0;
+    column_number = 1;
+    find_max(A,n,row_number,column_number);
+    double max;
+    max = A(row_number, column_number);
+    /*
+    cout << "First A = " << endl;
+    cout << A << fabs(max) << setw(10) << row_number << setw(10) << column_number << endl;
+    */
     // Use simpler test:
-
+    int m=0;
+    while(pow(fabs(max),2)> epsilon && m<20)
+    {
     if (fabs(max) > epsilon)
     {
         // computing tau, tan, cos and sine
@@ -78,8 +80,6 @@ double Jacobi (mat A, int n, double epsilon)
         }
         c = 1/sqrt(1+pow(t,2));
         s = t*c;
-
-        cout << A << max << setw(10) << row_number << setw(10) << column_number << setw(10) << epsilon << setw(10) << n << endl;
 
         // Computing the new matrix A
 
@@ -106,15 +106,37 @@ double Jacobi (mat A, int n, double epsilon)
         temp(row_number, row_number) = A(row_number, row_number)*pow(c,2) - 2*A(row_number,column_number)*c*s+A(column_number,column_number)*pow(s,2);
         temp(column_number, column_number) = A(column_number, column_number)*pow(c,2) + 2*A(row_number,column_number)*c*s+A(row_number,row_number)*pow(s,2);
         // temp(row_number, column_number) = (A(row_number, row_number)-A(column_number, column_number))*c*s+A(row_number, column_number)*(pow(c,2)-pow(s,2));
-        temp(column_number, row_number) = 0.0;  //By choice of theta
-        temp(row_number, column_number) = 0.0;  //By choice of theta
-
+        temp(column_number, row_number) = 0.00;  //By choice of theta
+        temp(row_number, column_number) = 0.00;  //By choice of theta
+/*
+        for (int i=0; i<n; i++)
+        {
+            for (int j=0; j<n; j++)
+            {
+                if (temp(i,j)<epsilon)
+                {
+                    temp(i,j) = 0.0;
+                }
+            }
+        }
+*/
         A = temp;
+        row_number = 0;
+        column_number = 1;
+
+        find_max(A,n,row_number,column_number);
+        m += 1;
+        max = A(row_number,column_number);
+/*
+        cout << "number of iterations = " << m << endl;
+        cout << "new A = " << endl;
+        cout << A << max << setw(10) << row_number << setw(10) << column_number << endl;
+*/
     }
- //   cout << A << endl;
+    }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     double rho_min = 0;
     double rho_max = 10;
@@ -124,6 +146,8 @@ int main(int argc, char *argv[])
     cout << "Please enter value of n:\n>";
     cin >> n;
     cout << "n = " << n << endl;
+    cout << "rho_min = " << rho_min << endl;
+    cout << "rho_max = " << rho_max << endl;
 
     double h = (rho_max - rho_min)/(n+1); //step length
 
@@ -153,12 +177,21 @@ int main(int argc, char *argv[])
     {
         A(i,i+1) = off_diagonal;
     }
-
-    int c=2;
-    int d=4;
-
-    // int Comp = Jacobi (c,d);
+/*
+    cout << "A=" << endl;
+    cout << A << endl;
+*/
     Jacobi(A,n,epsilon);
+
+    vec eigen_values(n);
+
+    for (int i=0; i<n; i++)
+    {
+        eigen_values(i) = A(i,i);
+    }
+
+    cout << "eigen values:" << endl;
+    cout << eigen_values << endl;
 
     return 0;
 }
